@@ -1,0 +1,9 @@
+Django>=4.0,<5.0                      # Install the latest stable version of Django.
+djangorestframework>=3.14.0            # Install the latest stable version of Django Rest Framework.
+mysqlclient==2.1.0                            # MySQL client for Django (ensure you have MySQL installed).
+django-cors-headers                    # For handling CORS in your project.
+gunicorn                                # For deploying the application in production.
+django-environ                          # To manage environment variables easily.
+djangorestframework-simplejwt           # For JWT Authentication (if needed).
+celery
+redis

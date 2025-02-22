@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  primary_db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: <DB_PASSWORD>
+      MYSQL_DATABASE: fortinet_primary_db
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3307:3306"  # Expose on port 3307 for example
+    networks:
+      - fortinet_network
+    volumes:
+      - primary_db-data:/var/lib/mysql
+
+  archived_db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: <DB_PASSWORD>
+      MYSQL_DATABASE: fortinet_archived_db
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3308:3306"  # Expose on port 3307 for example
+    networks:
+      - fortinet_network
+    volumes:
+      - archived_db-data:/var/lib/mysql
+
+  django:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=archived_db:3306  # Ensure this matches 'archived_db' service name
+      - DATABASE_URL=primary_db:3306  # Ensure this matches 'primary_db' service name
+    networks:
+      - fortinet_network
+    depends_on:
+      - primary_db
+      - archived_db
+
+  redis:
+    image: redis:latest
+    networks:
+      - fortinet_network
+    volumes:
+      - redis-data:/data
+
+  celery:
+    build: .
+    command: /bin/bash data_archival/start-celery.sh
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    networks:
+      - fortinet_network
+    depends_on:
+      - redis
+      - django
+      - primary_db
+      - archived_db
+
+volumes:
+  primary_db-data:
+  archived_db-data:
+  redis-data:
+
+networks:
+  fortinet_network:
+    driver: bridge
