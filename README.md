@@ -55,3 +55,9 @@ VALUES
 (DATE_SUB(NOW(), INTERVAL 196 DAY), 14, 'Nina Roberts', 'nina.roberts@example.com', 'English'),
 (DATE_SUB(NOW(), INTERVAL 90 DAY), 15, 'Oscar Blake', 'oscar.blake@example.com', 'Mathematics');
 ```
+
+### Considerations or Limitations to RUN:
+
+1. Create three user groups Admin, Teacher and Student from django admin, where Admin can access all data, Teacher will only access archived Teachers and Student data and Student will access only archived student data.
+2. Docker should be present to run
+3. Import both postman collection and environment for testing api to access archived database. 
